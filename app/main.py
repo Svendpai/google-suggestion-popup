@@ -15,7 +15,7 @@ DOUBLE_CLICK_THRESHOLD = 0.20
 keyboard = KeyboardController()
 mouse = MouseController()
 
-currentlyPressedKeys = set()
+currently_pressed_keys = set()
 
 # Exit program combinations
 CLOSE_PROGRAM_COMBINATIONS = [
@@ -27,7 +27,7 @@ SEARCH_COMBINATIONS = [
     {Key.alt_l, KeyCode(char='c')}
 ]
 
-def createWindow(input):
+def create_window(input):
     """Create a popup window with the given input
     
     Arguments:
@@ -58,15 +58,12 @@ def createWindow(input):
     window.focus_force() # Focus on window
 
     # destroy window when it loses focus
-    window.bind("<FocusOut>", lambda _: on_destroy())  # User focus on another window
-    window.bind("<Escape>", lambda _: on_destroy())    # User press Escape
-    window.protocol("WM_DELETE_WINDOW", lambda _: on_destroy())
-
-    def on_destroy():
-        window.destroy()
+    window.bind("<FocusOut>", lambda _: window.destroy())  # User focus on another window
+    window.bind("<Escape>", lambda _: window.destroy())    # User press Escape
+    window.protocol("WM_DELETE_WINDOW", lambda _: window.destroy())
 
     def on_confirm():
-        on_destroy()
+        window.destroy()
         pyperclip.copy(input)
         keyboard.type(input)
 
@@ -91,7 +88,7 @@ def on_click(x, y, button, pressed):
     if button == Button.left and not pressed:
         click_time = time.time()  # Get the current time
         if click_time - LAST_CLICK_TIME < DOUBLE_CLICK_THRESHOLD and click_time - LAST_CLICK_TIME > 0:
-            createPopup()
+            create_popup()
         LAST_CLICK_TIME = click_time  # Update the last click time
 
 def search():
@@ -110,7 +107,7 @@ def search():
     if data == None or data[1] == []: return # No suggestions
     return data[1][0] # Return first suggestion
 
-def createPopup():
+def create_popup():
     """Create a popup window with the first suggestion in the clipboard
 
     Returns:
@@ -119,7 +116,7 @@ def createPopup():
     
     suggestion = search()
     if suggestion == None: return
-    createWindow(suggestion)
+    create_window(suggestion)
 
 def query_suggestion_data(query):
     """Query Google for suggestions
@@ -156,7 +153,7 @@ def copy_clipboard():
     pyperclip.copy("")
 
     # Release all pressed keys before copying
-    for key in currentlyPressedKeys:
+    for key in currently_pressed_keys:
         keyboard.release(key)
 
     keyboard.press(Key.ctrl.value)
@@ -175,12 +172,12 @@ def on_press(key):
     Returns:
         None
     """
-    currentlyPressedKeys.add(key)
-    if any(all(k in currentlyPressedKeys for k in COMBO) for COMBO in CLOSE_PROGRAM_COMBINATIONS):
+    currently_pressed_keys.add(key)
+    if any(all(k in currently_pressed_keys for k in COMBO) for COMBO in CLOSE_PROGRAM_COMBINATIONS):
         quit()
-    elif any(all(k in currentlyPressedKeys for k in COMBO) for COMBO in SEARCH_COMBINATIONS):
-        createPopup()
-        currentlyPressedKeys.clear()
+    elif any(all(k in currently_pressed_keys for k in COMBO) for COMBO in SEARCH_COMBINATIONS):
+        create_popup()
+        currently_pressed_keys.clear()
 
 def quit():
     print("Quitting...")
@@ -195,8 +192,8 @@ def on_release(key):
     Returns:
         None
     """
-    if key in currentlyPressedKeys:
-        currentlyPressedKeys.remove(key)
+    if key in currently_pressed_keys:
+        currently_pressed_keys.remove(key)
 
 def create_tray_icon():
     """Create a tray icon
