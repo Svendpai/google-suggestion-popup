@@ -202,12 +202,12 @@ def create_tray_icon():
         None
     """
 
-    image = Image.open("favicon.ico")
+    image = Image.open("./static/images/favicon.ico")
     menu = pystray.Menu(
         pystray.MenuItem('Quit', quit)
     )
     
-    icon = pystray.Icon('test', image, "My System Tray Icon", menu)
+    icon = pystray.Icon("Suggestion App", image, "Suggestion App", menu=menu)
     icon.run()
 
 global mouse_listener, keyboard_listener
