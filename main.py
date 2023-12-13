@@ -6,6 +6,8 @@ import os
 from threading import Thread
 import requests
 import tkinter as tk
+import pystray
+from PIL import Image
 
 LAST_CLICK_TIME = 0
 DOUBLE_CLICK_THRESHOLD = 0.20
@@ -174,11 +176,14 @@ def on_press(key):
     """
     currentlyPressedKeys.add(key)
     if any(all(k in currentlyPressedKeys for k in COMBO) for COMBO in CLOSE_PROGRAM_COMBINATIONS):
-        print("Exiting...")
-        os._exit(0)
+        quit()
     elif any(all(k in currentlyPressedKeys for k in COMBO) for COMBO in SEARCH_COMBINATIONS):
         createPopup()
         currentlyPressedKeys.clear()
+
+def quit():
+    print("Quitting...")
+    os._exit(0)
 
 def on_release(key):
     """Called when a key is released
@@ -191,6 +196,21 @@ def on_release(key):
     """
     if key in currentlyPressedKeys:
         currentlyPressedKeys.remove(key)
+
+def create_tray_icon():
+    """Create a tray icon
+
+    Returns:
+        None
+    """
+
+    image = Image.open("favicon.ico")
+    menu = pystray.Menu(
+        pystray.MenuItem('Quit', quit)
+    )
+    
+    icon = pystray.Icon('test', image, "My System Tray Icon", menu)
+    icon.run()
 
 global mouse_listener, keyboard_listener
 
@@ -211,6 +231,8 @@ def main():
 
     mouse_thread.join()
     keyboard_thread.join()
+
+    create_tray_icon()
 
     while True:
         time.sleep(1)  # keep program running to allow keyboard listener to work
