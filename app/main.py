@@ -67,6 +67,7 @@ def createWindow(input):
 
     def on_confirm():
         on_destroy()
+        pyperclip.copy(input)
         keyboard.type(input)
 
     window.deiconify() # Show window
